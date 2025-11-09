@@ -26,6 +26,31 @@ async function run() {
     const db = client.db('heroHomeDB');
     const Services = db.collection("Services");
 
+
+     app.get('/services', async(req, res) => {
+      const email = req.query.email;
+      const query = {}
+      if(email){
+        query.providerEmail = email;
+      }
+      const cursor = Services.find(query)
+      const result  = await cursor.toArray()
+      res.send(result)
+    })
+
+    app.get('/services', async(req, res) => {
+        const cursor = Services.find();
+        const result = await cursor.toArray()
+        res.send(result)
+    })
+
+   
+    app.get('/service', async(req, res) => {
+        const cursor = Services.find().limit(6)
+        const result = await cursor.toArray()
+        res.send(result)
+    })
+
     app.post("/services", async (req, res) => {
       const newService = req.body;
 
