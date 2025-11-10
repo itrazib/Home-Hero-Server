@@ -39,6 +39,8 @@ async function run() {
       res.send(result)
     })
 
+   
+
     app.get('/services/:id', async(req, res) => {
       const id = req.params.id;
       const query = {_id: new ObjectId(id)}
@@ -46,10 +48,28 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/my-booking/:id', async(req, res) => {
+      const email = req.query.email
+      const query = {}
+      if(email){
+        query.email = email
+      }
+
+      const cursor = MyBooking.find(query)
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
     app.get('/services', async(req, res) => {
         const cursor = Services.find();
         const result = await cursor.toArray()
         res.send(result)
+    })
+
+     app.get('/my-booking', async(req, res) => {
+      const cursor = MyBooking.find();
+      const result = await cursor.toArray();
+      res.send(result)
     })
 
    
@@ -70,9 +90,9 @@ async function run() {
       }
     });
 
-    app.post('my-booking', async(req, res) => {
+    app.post('/my-booking', async(req, res) => {
       const newBooking = req.body;
-      const result = await MyBooking.collection(newBooking)
+      const result = await MyBooking.insertOne(newBooking)
       res.send(result)
     })
 
