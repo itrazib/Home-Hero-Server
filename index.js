@@ -25,6 +25,7 @@ async function run() {
     await client.connect();
     const db = client.db('heroHomeDB');
     const Services = db.collection("Services");
+    const MyBooking = db.collection("MyBooking")
 
 
      app.get('/services', async(req, res) => {
@@ -68,6 +69,12 @@ async function run() {
         res.status(500).send({ message: "Do not Added the services" });
       }
     });
+
+    app.post('my-booking', async(req, res) => {
+      const newBooking = req.body;
+      const result = await MyBooking.collection(newBooking)
+      res.send(result)
+    })
 
     await client.db("admin").command({ ping: 1 });
     console.log(
