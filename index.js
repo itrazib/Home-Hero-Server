@@ -48,7 +48,14 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/my-booking/:id', async(req, res) => {
+
+    app.get('/services', async(req, res) => {
+        const cursor = Services.find();
+        const result = await cursor.toArray()
+        res.send(result)
+    })
+
+    app.get('/my-booking', async(req, res) => {
       const email = req.query.email
       const query = {}
       if(email){
@@ -60,10 +67,11 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/services', async(req, res) => {
-        const cursor = Services.find();
-        const result = await cursor.toArray()
-        res.send(result)
+     app.get("/my-booking/:id", async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await MyBooking.findOne(query)
+      res.send(result)
     })
 
      app.get('/my-booking', async(req, res) => {
@@ -72,8 +80,9 @@ async function run() {
       res.send(result)
     })
 
-   
-    app.get('/service', async(req, res) => {
+     
+
+       app.get('/service', async(req, res) => {
         const cursor = Services.find().limit(6)
         const result = await cursor.toArray()
         res.send(result)
@@ -96,6 +105,15 @@ async function run() {
       res.send(result)
     })
 
+     app.delete('/my-booking/:id', async(req, res) => {
+        const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await MyBooking.deleteOne(query)
+      res.send(result)
+    })
+
+
+    
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
