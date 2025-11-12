@@ -26,6 +26,7 @@ async function run() {
     const db = client.db("heroHomeDB");
     const Services = db.collection("Services");
     const MyBooking = db.collection("MyBooking");
+    const Review = db.collection("Review");
 
     app.get("/services", async (req, res) => {
       const email = req.query.email;
@@ -65,13 +66,22 @@ async function run() {
       let filtered = allServices;
       if (query.price) {
         filtered = allServices.filter((item) => {
-          const price = parseInt(item.price); 
+          const price = parseInt(item.price);
           return price >= minPrice && price <= maxPrice;
         });
       }
 
       res.send(filtered);
     });
+
+    app.get("/search", async(req, res) => {
+      const searchText = req.query.search;
+      const result = await Services.find({
+        name: {$regex : searchText, $options: "i"}
+      }).toArray()
+      res.send(result)
+
+    })
 
     app.get("/my-booking", async (req, res) => {
       const email = req.query.email;
@@ -92,6 +102,23 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/top-rated", async (req, res) => {
+      const allServices = await Services.find().toArray();
+
+      const rated = allServices.map((s) => {
+        const avg =
+          s.reviews && s.reviews.length > 0
+            ? s.reviews.reduce((a, r) => a + r.rating, 0) / s.reviews.length
+            : 0;
+        return { ...s, avgRating: avg };
+      });
+
+      const topSix = rated
+        .sort((a, b) => b.avgRating - a.avgRating)
+        .slice(0, 6);
+      res.send(topSix);
+    });
+
     app.get("/my-booking", async (req, res) => {
       const cursor = MyBooking.find();
       const result = await cursor.toArray();
@@ -101,6 +128,17 @@ async function run() {
     app.get("/service", async (req, res) => {
       const cursor = Services.find().limit(6);
       const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.post("/services/:id/review", async (req, res) => {
+      const serviceId = req.params.id;
+      const newReview= req.body;
+      const result = await Services.updateOne(
+        { _id: new ObjectId(serviceId) },
+        { $push: { reviews: newReview } }
+      );
+
       res.send(result);
     });
 
